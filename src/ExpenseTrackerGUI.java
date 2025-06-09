@@ -120,7 +120,7 @@ class ExpenseManager {
 
     public double getTotalExpenses() {
         double total = 0;
-        for (Expense exp : expenses) {
+        for (Expense exp : expenseDAO.getAllExpenses()) {
             total += exp.getAmount();
         }
         return total;
@@ -238,6 +238,8 @@ public class ExpenseTrackerGUI extends JFrame {
         initComponents();
         layoutComponents();
         registerListeners();
+        refreshTable(manager.getExpenses());
+        updateTotalLabel();
     }
 
     private void initComponents() {
