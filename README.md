@@ -1,18 +1,3 @@
-Overview:
-
-ExpenseTracker/
-├── README.md
-├── resources/
-│   ├── script.sql
-│   └── script_sqlite.sql
-├── scripts/
-│   ├── clean.sh
-│   └── run.sh
-├── sqlite-jdbc-3.50.1.0.jar
-└── src/
-    └── ExpenseTrackerGUI.java
-
-
 Instructions:
 
 # 1. Compile .java → bin/, with JDBC on classpath:
