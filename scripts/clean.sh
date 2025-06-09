@@ -3,4 +3,4 @@ clear
 set -e
 
 rm -rf bin
-rm -f *.db
+rm -f expense_tracker.db
