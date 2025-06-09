@@ -4,6 +4,7 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.sql.*;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -163,20 +164,21 @@ class ExpenseDAO {
         String sql = "SELECT * FROM expenses";
         try (Statement stmt = connection.createStatement();
                 ResultSet rs = stmt.executeQuery(sql)) {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
             while (rs.next()) {
                 double amount = rs.getDouble("amount");
-                Date date = rs.getDate("date");
+                String dateStr = rs.getString("date");
+                Date date = sdf.parse(dateStr);
                 String description = rs.getString("description");
                 String type = rs.getString("type");
                 String details = rs.getString("details");
-
                 switch (type) {
                     case "Food":
                         expenses.add(new FoodExpense(amount, date, description, details));
                         break;
                     case "Travel":
-                        String[] travelDetails = details.split(", ");
-                        expenses.add(new TravelExpense(amount, date, description, travelDetails[0], travelDetails[1]));
+                        String[] td = details.split(", ");
+                        expenses.add(new TravelExpense(amount, date, description, td[0], td[1]));
                         break;
                     case "Utility":
                         expenses.add(new UtilityExpense(amount, date, description, details));
@@ -184,6 +186,8 @@ class ExpenseDAO {
                 }
             }
         } catch (SQLException e) {
+            e.printStackTrace();
+        } catch (ParseException e) {
             e.printStackTrace();
         }
         return expenses;
