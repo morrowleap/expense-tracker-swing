@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-clear
 set -e
 
 rm -rf bin
+mkdir -p bin
+
 rm -f expense_tracker.db
