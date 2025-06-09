@@ -101,16 +101,13 @@ class UtilityExpense extends Expense {
 
 // ExpenseManager class
 class ExpenseManager {
-    private ArrayList<Expense> expenses;
     private ExpenseDAO expenseDAO;
 
     public ExpenseManager() {
-        this.expenses = new ArrayList<>();
         this.expenseDAO = new ExpenseDAO();
     }
 
     public void addExpense(Expense exp) {
-        expenses.add(exp);
         expenseDAO.insertExpense(exp);
     }
 
@@ -120,7 +117,7 @@ class ExpenseManager {
 
     public double getTotalExpenses() {
         double total = 0;
-        for (Expense exp : expenseDAO.getAllExpenses()) {
+        for (Expense exp : getExpenses()) {
             total += exp.getAmount();
         }
         return total;
