@@ -382,11 +382,14 @@ public class ExpenseTrackerGUI extends JFrame {
             JOptionPane.showMessageDialog(this, "Expense added successfully!", "Success",
                     JOptionPane.INFORMATION_MESSAGE);
         } catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(this, "Invalid amount: " + ex.getMessage(), "Input Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Invalid amount: " + ex.getMessage(), "Input Error",
+                    JOptionPane.ERROR_MESSAGE);
         } catch (ParseException ex) {
-            JOptionPane.showMessageDialog(this, "Invalid date: " + ex.getMessage(), "Input Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Invalid date: " + ex.getMessage(), "Input Error",
+                    JOptionPane.ERROR_MESSAGE);
         } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(this, "Database error: " + ex.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Database error: " + ex.getMessage(), "Database Error",
+                    JOptionPane.ERROR_MESSAGE);
         }
     }
 
