@@ -107,7 +107,7 @@ class ExpenseManager {
         this.expenseDAO = new ExpenseDAO();
     }
 
-    public void addExpense(Expense exp) {
+    public void addExpense(Expense exp) throws SQLException {
         expenseDAO.insertExpense(exp);
     }
 
@@ -132,7 +132,7 @@ class ExpenseDAO {
         connection = DatabaseConnection.getConnection();
     }
 
-    public void insertExpense(Expense exp) {
+    public void insertExpense(Expense exp) throws SQLException {
         String sql = "INSERT INTO expenses (amount, date, description, type, details) VALUES (?, ?, ?, ?, ?)";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setDouble(1, exp.getAmount());
@@ -152,7 +152,8 @@ class ExpenseDAO {
             pstmt.setString(5, details);
             pstmt.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.println("Error inserting expense: " + e.getMessage());
+            throw e;
         }
     }
 
@@ -183,9 +184,9 @@ class ExpenseDAO {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.println("Error retrieving expenses: " + e.getMessage());
         } catch (ParseException e) {
-            e.printStackTrace();
+            System.err.println("Error parsing date: " + e.getMessage());
         }
         return expenses;
     }
@@ -203,8 +204,11 @@ class DatabaseConnection {
                 stmt.execute("PRAGMA foreign_keys = ON");
             }
             return conn;
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            System.err.println("JDBC Driver not found: " + e.getMessage());
+            return null;
+        } catch (SQLException e) {
+            System.err.println("Failed to connect to database: " + e.getMessage());
             return null;
         }
     }
@@ -368,8 +372,12 @@ public class ExpenseTrackerGUI extends JFrame {
             clearInputFields();
             JOptionPane.showMessageDialog(this, "Expense added successfully!", "Success",
                     JOptionPane.INFORMATION_MESSAGE);
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Input Error", JOptionPane.ERROR_MESSAGE);
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(this, "Invalid amount: " + ex.getMessage(), "Input Error", JOptionPane.ERROR_MESSAGE);
+        } catch (ParseException ex) {
+            JOptionPane.showMessageDialog(this, "Invalid date: " + ex.getMessage(), "Input Error", JOptionPane.ERROR_MESSAGE);
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(this, "Database error: " + ex.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
