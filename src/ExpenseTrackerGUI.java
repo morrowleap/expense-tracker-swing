@@ -116,11 +116,7 @@ class ExpenseManager {
     }
 
     public double getTotalExpenses() {
-        double total = 0;
-        for (Expense exp : getExpenses()) {
-            total += exp.getAmount();
-        }
-        return total;
+        return expenseDAO.getTotalAmount();
     }
 }
 
@@ -189,6 +185,19 @@ class ExpenseDAO {
             System.err.println("Error parsing date: " + e.getMessage());
         }
         return expenses;
+    }
+
+    public double getTotalAmount() {
+        String sql = "SELECT SUM(amount) FROM expenses";
+        try (Statement stmt = connection.createStatement();
+                ResultSet rs = stmt.executeQuery(sql)) {
+            if (rs.next()) {
+                return rs.getDouble(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0.0;
     }
 }
 
