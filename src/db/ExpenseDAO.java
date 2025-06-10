@@ -7,10 +7,13 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
+// custom exception for database connection failures
+import db.DatabaseConnectionException;
+
 public class ExpenseDAO {
     private Connection connection;
 
-    public ExpenseDAO() {
+    public ExpenseDAO() throws DatabaseConnectionException {
         connection = DatabaseConnection.getConnection();
     }
 

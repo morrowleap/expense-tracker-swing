@@ -1,6 +1,7 @@
 package gui;
 
 import model.*;
+import db.DatabaseConnectionException;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -26,7 +27,14 @@ public class ExpenseTrackerGUI extends JFrame {
     private JLabel totalLabel;
 
     public ExpenseTrackerGUI() {
-        manager = new ExpenseManager();
+        try {
+            manager = new ExpenseManager();
+        } catch (DatabaseConnectionException ex) {
+            JOptionPane.showMessageDialog(this,
+                    "Unable to connect to database: " + ex.getMessage(),
+                    "Database Error", JOptionPane.ERROR_MESSAGE);
+            System.exit(1);
+        }
         setTitle("Expense Tracker");
         setSize(800, 600);
         setLocationRelativeTo(null);
@@ -140,42 +148,82 @@ public class ExpenseTrackerGUI extends JFrame {
     }
 
     private void addExpense() {
+        String type = (String) expenseTypeCombo.getSelectedItem();
+        String amountStr = amountField.getText().trim();
+        String desc = descriptionField.getText().trim();
+        String dateStr = dateField.getText().trim();
+
+        if (amountStr.isEmpty() || desc.isEmpty() || dateStr.isEmpty()) {
+            JOptionPane.showMessageDialog(this,
+                    "Amount, description and date are required.",
+                    "Input Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        double amount;
         try {
-            String type = (String) expenseTypeCombo.getSelectedItem();
-            double amount = Double.parseDouble(amountField.getText());
-            String desc = descriptionField.getText().trim();
-            String dateStr = dateField.getText().trim();
-            Date date = new SimpleDateFormat("dd-MM-yyyy").parse(dateStr);
-            Expense exp = null;
+            amount = Double.parseDouble(amountStr);
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(this, "Invalid amount.",
+                    "Input Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
 
-            switch (type) {
-                case "Food":
-                    exp = new FoodExpense(amount, date, desc, restaurantField.getText().trim());
-                    break;
-                case "Travel":
-                    exp = new TravelExpense(amount, date, desc, destinationField.getText().trim(),
-                            transportField.getText().trim());
-                    break;
-                case "Utility":
-                    exp = new UtilityExpense(amount, date, desc, utilityTypeField.getText().trim());
-                    break;
-            }
+        if (amount <= 0) {
+            JOptionPane.showMessageDialog(this, "Amount must be positive.",
+                    "Input Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
 
+        Date date;
+        try {
+            date = new SimpleDateFormat("dd-MM-yyyy").parse(dateStr);
+        } catch (ParseException ex) {
+            JOptionPane.showMessageDialog(this, "Invalid date: " + ex.getMessage(),
+                    "Input Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        Expense exp = null;
+        switch (type) {
+            case "Food":
+                if (restaurantField.getText().trim().isEmpty()) {
+                    JOptionPane.showMessageDialog(this, "Restaurant is required.",
+                            "Input Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                exp = new FoodExpense(amount, date, desc, restaurantField.getText().trim());
+                break;
+            case "Travel":
+                if (destinationField.getText().trim().isEmpty()
+                        || transportField.getText().trim().isEmpty()) {
+                    JOptionPane.showMessageDialog(this, "Destination and transport mode are required.",
+                            "Input Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                exp = new TravelExpense(amount, date, desc, destinationField.getText().trim(),
+                        transportField.getText().trim());
+                break;
+            case "Utility":
+                if (utilityTypeField.getText().trim().isEmpty()) {
+                    JOptionPane.showMessageDialog(this, "Utility type is required.",
+                            "Input Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                exp = new UtilityExpense(amount, date, desc, utilityTypeField.getText().trim());
+                break;
+        }
+
+        try {
             manager.addExpense(exp);
             refreshTable(manager.getExpenses());
             updateTotalLabel();
             clearInputFields();
-            JOptionPane.showMessageDialog(this, "Expense added successfully!", "Success",
-                    JOptionPane.INFORMATION_MESSAGE);
-        } catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(this, "Invalid amount: " + ex.getMessage(), "Input Error",
-                    JOptionPane.ERROR_MESSAGE);
-        } catch (ParseException ex) {
-            JOptionPane.showMessageDialog(this, "Invalid date: " + ex.getMessage(), "Input Error",
-                    JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Expense added successfully!",
+                    "Success", JOptionPane.INFORMATION_MESSAGE);
         } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(this, "Database error: " + ex.getMessage(), "Database Error",
-                    JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Database error: " + ex.getMessage(),
+                    "Database Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
