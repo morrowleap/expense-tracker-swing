@@ -340,37 +340,81 @@ public class ExpenseTrackerGUI extends JFrame {
         addExpenseButton.addActionListener(e -> addExpense());
     }
 
+    private void showError(String msg) {
+        JOptionPane.showMessageDialog(this, msg, "Input Error", JOptionPane.ERROR_MESSAGE);
+    }
+
     private void addExpense() {
+        String type = (String) expenseTypeCombo.getSelectedItem();
+
+        // validate amount
+        String amtText = amountField.getText().trim();
+        double amount;
         try {
-            String type = (String) expenseTypeCombo.getSelectedItem();
-            double amount = Double.parseDouble(amountField.getText());
-            String desc = descriptionField.getText().trim();
-            String dateStr = dateField.getText().trim();
-            Date date = new SimpleDateFormat("dd-MM-yyyy").parse(dateStr);
-            Expense exp = null;
-
-            switch (type) {
-                case "Food":
-                    exp = new FoodExpense(amount, date, desc, restaurantField.getText().trim());
-                    break;
-                case "Travel":
-                    exp = new TravelExpense(amount, date, desc, destinationField.getText().trim(),
-                            transportField.getText().trim());
-                    break;
-                case "Utility":
-                    exp = new UtilityExpense(amount, date, desc, utilityTypeField.getText().trim());
-                    break;
+            amount = Double.parseDouble(amtText);
+            if (amount <= 0) {
+                showError("Invalid amount: please enter a positive number.");
+                return;
             }
-
-            manager.addExpense(exp);
-            refreshTable(manager.getExpenses());
-            updateTotalLabel();
-            clearInputFields();
-            JOptionPane.showMessageDialog(this, "Expense added successfully!", "Success",
-                    JOptionPane.INFORMATION_MESSAGE);
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Input Error", JOptionPane.ERROR_MESSAGE);
+        } catch (NumberFormatException ex) {
+            showError("Invalid amount: please enter a positive number.");
+            return;
         }
+
+        // validate description
+        String desc = descriptionField.getText().trim();
+        if (desc.isEmpty()) {
+            showError("Description cannot be empty.");
+            return;
+        }
+
+        // validate date
+        String dateStr = dateField.getText().trim();
+        Date date;
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
+            sdf.setLenient(false);
+            date = sdf.parse(dateStr);
+        } catch (ParseException ex) {
+            showError("Invalid date. Please use dd-MM-yyyy format.");
+            return;
+        }
+
+        Expense exp = null;
+        switch (type) {
+            case "Food":
+                String restaurant = restaurantField.getText().trim();
+                if (restaurant.isEmpty()) {
+                    showError("Restaurant field cannot be empty.");
+                    return;
+                }
+                exp = new FoodExpense(amount, date, desc, restaurant);
+                break;
+            case "Travel":
+                String destination = destinationField.getText().trim();
+                String transport = transportField.getText().trim();
+                if (destination.isEmpty() || transport.isEmpty()) {
+                    showError("Destination and transport mode cannot be empty.");
+                    return;
+                }
+                exp = new TravelExpense(amount, date, desc, destination, transport);
+                break;
+            case "Utility":
+                String utility = utilityTypeField.getText().trim();
+                if (utility.isEmpty()) {
+                    showError("Utility type cannot be empty.");
+                    return;
+                }
+                exp = new UtilityExpense(amount, date, desc, utility);
+                break;
+        }
+
+        manager.addExpense(exp);
+        refreshTable(manager.getExpenses());
+        updateTotalLabel();
+        clearInputFields();
+        JOptionPane.showMessageDialog(this, "Expense added successfully!", "Success",
+                JOptionPane.INFORMATION_MESSAGE);
     }
 
     private void refreshTable(ArrayList<Expense> expenses) {
