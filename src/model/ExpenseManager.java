@@ -1,13 +1,14 @@
 package model;
 
 import db.ExpenseDAO;
+import db.DatabaseConnectionException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
 public class ExpenseManager {
     private ExpenseDAO expenseDAO;
 
-    public ExpenseManager() {
+    public ExpenseManager() throws DatabaseConnectionException {
         this.expenseDAO = new ExpenseDAO();
     }
 
