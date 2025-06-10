@@ -16,17 +16,31 @@ This project is a small Java Swing application used to record everyday expenses.
 
 ## Quick start
 
+### Linux/macOS
 1. `bash scripts/clean.sh` – create the `bin` directory and remove any old database.
 2. `bash scripts/init_db.sh` – create `expense_tracker.db` using the SQL script.
 3. `bash scripts/run.sh` – compile sources and launch the GUI (requires a display).
+
+### Windows (PowerShell)
+1. `powershell -ExecutionPolicy Bypass -File scripts/windows/clean.ps1`
+2. `powershell -ExecutionPolicy Bypass -File scripts/windows/init_db.ps1`
+3. `powershell -ExecutionPolicy Bypass -File scripts/windows/run.ps1`
 
 The scripts simply wrap the manual commands shown below and are convenient during development. To keep your existing expense data, back up `expense_tracker.db` before running `init_db.sh` as it deletes the file.
 
 ### Manual commands
 
+#### Linux/macOS
 ```bash
 javac -d bin -cp sqlite-jdbc-3.50.1.0.jar $(find src -name "*.java")
-java  -cp bin:sqlite-jdbc-3.50.1.0.jar gui.ExpenseTrackerGUI
+java -cp bin:sqlite-jdbc-3.50.1.0.jar gui.ExpenseTrackerGUI
+```
+
+#### Windows (PowerShell)
+```powershell
+$files = Get-ChildItem -Path src -Recurse -Filter *.java | ForEach-Object { $_.FullName }
+javac -d bin -cp "sqlite-jdbc-3.50.1.0.jar" $files
+java -cp "bin;sqlite-jdbc-3.50.1.0.jar" gui.ExpenseTrackerGUI
 ```
 
 ## Database schema
