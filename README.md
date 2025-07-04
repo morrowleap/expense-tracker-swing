@@ -1,5 +1,7 @@
 # Expense Tracker
 
+![Application screenshot](temp/Screenshot.png)
+
 This project is a small Java Swing application used to record everyday expenses. Entries are stored in a local SQLite database so they persist between runs. The main window lets you create a new expense, view all stored expenses and see the running total.
 
 ## Features
